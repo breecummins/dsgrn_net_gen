@@ -13,13 +13,11 @@ class Job():
             datetime = subprocess.check_output(['date +%Y_%m_%d_%H_%M_%S'],shell=True).decode(sys.stdout.encoding).strip()
         else:
             datetime = self.params["datetime"]
-        if "computationsdir" not in self.params or self.params["computationsdir"] == "":
-            self.params["computationsdir"] = "computations"+datetime
-        self.perturbationsdir = os.path.join(os.path.expanduser(self.params["computationsdir"]),
-                                                "networks"+datetime)
+        resultsdir = "" if "resultsdir" not in self.params else self.params["resultsdir"]
+        resultsdir =os.path.join(os.path.expanduser(resultsdir), "dsgrn_net_gen_results"+datetime)
+        self.perturbationsdir = os.path.join(resultsdir,"networks"+datetime)
         os.makedirs(self.perturbationsdir)
-        self.inputfilesdir = os.path.join(os.path.expanduser(self.params["computationsdir"]),
-                                                "inputs"+datetime)
+        self.inputfilesdir = os.path.join(resultsdir,"inputs"+datetime)
         os.makedirs(self.inputfilesdir)
         # save parameter file to computations folder
         shutil.copy(self.paramfile,self.inputfilesdir)
@@ -47,10 +45,10 @@ class Job():
             while networks[-1] == '\n':
                 networks = networks[:-1]
             networks = [networks]
-        print("\nNetwork search beginning.\n")
         sys.stdout.flush()
         self._parsefile('edge',fileparsers.parseEdgeFile)
         self._parsefile('node',fileparsers.parseNodeFile)
+        print("\nNetwork search beginning.\n")
         perturbed_networks = []
         for network_spec in networks:
             perturbed_networks.extend(networksearch.perturbNetwork(self.params,network_spec))

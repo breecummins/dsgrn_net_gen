@@ -15,32 +15,41 @@ def perturbNetwork(params, network_spec):
     in params (see below). Duplicate networks are possible because there is no graph isomorphism checking. Empirical
     usage suggests that the number of duplicates is too small to warrant the computational cost of checking.
 
-    :param params: params is a dictionary with the following key,value pairs. Every one has a default,
-                   so any of these parameters are optional.
-        "nodelist" : default = [], a list of node labels (strings) acceptable to add OR None OR empty list
-        "edgelist" : default = [], a list of ("source","target","regulation") tuples OR None OR empty list
-                   NOTE: negative self-loops are removed before perturbation
-        "probabilities" : default = {"addNode" : 0.5, "removeNode" : 0.0, "addEdge" : 0.5, "removeEdge" : 0.0}
-                          dictionary with operations keying the probability that the operation will occur
-                          NOTE: setting any probability to zero will ensure the operation does not occur
-                          NOTE: will be normalized if it does not sum to 1
-                          NOTE: every added node is also given an inedge and an outedge as part of the operation
-        "range_operations" : default = [1,5], [int,int] min to max # of node/edge changes allowed per graph, endpoint inclusive
-        "numneighbors" : default = 1000, integer > 0, how many networks to construct
-        "time_to_wait" : default = 30, number of seconds to wait before halting perturbation procedure (avoid infinite while loop)
-        "maxparams" : default = 20000, integer > 0, parameters per database allowed (eventually this should be deprecated for estimated
-                      computation time)
-        "filters" : default = None, dictionary of filter function name strings from filters.py keying input dictionaries
+    :param params: params is a dictionary with the following key,value pairs.
+        Required:
+        "numneighbors" : integer > 0, how many networks to construct
+        "probabilities" : dictionary with node and edge operations keying the probability that the operation will occur
+                          template: {"addNode" : p1, "removeNode" : p2, "addEdge" : p3, "removeEdge" : p4}
+                          with p1-p4 between 0 and 1, and p1+p2+p3+p4 = 1. If the summation condition does not hold,
+                          the probabilities will be rescaled to sum to 1. Setting any probability to zero will ensure
+                          that the operation does not occur.
+        "range_operations" : [int,int] min to max # of node/edge changes allowed per graph, endpoint inclusive
+        "maxparams" : the maximum number of DSGRN parameters allowed per network. Choosing this value too small will
+                        eliminate many networks. Picking the value is tricky, as it depends where in network space the
+                        search is occurring. In general, 10,000 is small, 500,000 is moderate, and 1,000,000,000 is on
+                        the very edge of computability.
+        Optional:
+        "nodelist" : a list of node labels (strings) acceptable to add to the network,
+                    default = [], unconstrained addition of nodes with dummy names
+        "edgelist" : a list of ("source","target","regulation") tuples to add as edges to the network
+                    default = [], unconstrained addition of edges to existing nodes
+                   NOTE: negative self-loops are removed before perturbation, as these are not currently implemented in DSGRN
+        "time_to_wait" : integer number of seconds to wait before halting perturbation procedure (avoid infinite while loop)
+                        default = 30
+        "filters" : dictionary of filter function name strings from filters.py keying input dictionaries
                     with the needed keyword arguments for each function
                     format: {"function_name1" : kwargs_dict_1, "function_name2" : kwargs_dict_2, ... }
                     See filters.py for the implemented filter functions and their arguments.
-        "compressed_output" : default = True, prints count of warnings instead of printing every network spec that
-                                fails filtering. This substantially reduces printing to terminal and should only be
-                                set to False for trouble-shooting, since printing is a bottleneck.
-        "DSGRN_optimized" : default = True, prioritizes adding new edges to nodes missing in- or out-edges.
-                            Should only be set to False if nodes without in- or out-edges are desired.
+                    default = {"is_connected" : {}}, only weakly connected networks are accepted
+        "compressed_output" : True or False (true or false in .json format), default = True, prints count of warnings
+                            instead of printing every network spec that fails filtering. This substantially reduces
+                            printing to terminal and should only be set to False for troubleshooting, since printing
+                            is a bottleneck.
+        "DSGRN_optimized" : True or False (true or false in .json format), default = True, prioritizes adding new edges
+                            to nodes missing in- or out-edges, which can decrease computation time.
+                            Set to False to remove this bias.
                             NOTE: Can still get nodes without in- or out-edges if probabilities["removeEdge"] is nonzero
-        "random_seed" : default = time.time(), optional random seed for repeatability
+        "random_seed" : optional random seed for repeatability, default = time.time() for stochastic results
     :param network_spec: DSGRN network specification string
     :return: list of essential DSGRN network specification strings
 
@@ -107,18 +116,11 @@ def set_defaults(params):
         params["nodelist"] = []
     if "edgelist" not in params:
         params["edgelist"] = []
-    if "probabilities" not in params:
-        params["probabilities"] = {"addNode" : 0.50, "removeNode" : 0.0, "addEdge" : 0.50, "removeEdge" : 0.0}
-    if "range_operations" not in params:
-        params["range_operations"] = [1,5]
-    # add 1 so that endpoint is inclusive
     params["range_operations"] = [params["range_operations"][0],params["range_operations"][1]+1]
     if "numperturbations" not in params:
         params["numperturbations"] = 1000
     if "time_to_wait" not in params:
         params["time_to_wait"] = 30
-    if "maxparams" not in params:
-        params["maxparams"] = 20000
     if "filters" not in params or not params["filters"]:
         params["filters"] = [partial(filters.is_connected,kwargs={})]
     else:
