@@ -1,8 +1,8 @@
 import copy
 
-################################
-# Directed Acyclic Graph Class #
-################################
+########################
+# Directed Graph Class #
+########################
 
 
 class Graph:
@@ -103,24 +103,6 @@ class Graph:
         for (u, v) in self.edges(): G.add_edge(v, u, self.edge_label(u, v))
         return G
 
-    # def transitive_closure(self):
-    #   """ Return a new graph which is the transitive closure """
-    #   G = self.clone ()
-    #   for w in self.vertices():
-    #     for u in self.vertices():
-    #       for v in self.vertices():
-    #         if w in G.adjacencies(u) and v in G.adjacencies(w):
-    #           G . add_edge(u,v)
-    #   return G
-    # def transitive_reduction(self):
-    #   """ Return a new graph which is the transitive reduction """
-    #   TC = self.transitive_closure ()
-    #   G = self.clone ()
-    #   for (u,v) in TC.edges():
-    #     for w in TC.adjacencies(v):
-    #       G.remove_edge(u,w)
-    #   return G
-
 
 ##################################################
 # Translation to and from network specifications
@@ -129,7 +111,7 @@ class Graph:
 
 
 def createEssentialNetworkSpecFromGraph(graph):
-    # take a graph and return a network spec file
+    # take a graph and return a DSGRN network spec file
 
     # get nodes in order
     vs = { v : graph.vertex_label(v) for v in sorted(list(graph.vertices())) }
@@ -151,7 +133,7 @@ def createEssentialNetworkSpecFromGraph(graph):
 
 
 def getGraphFromNetworkSpec(network_spec):
-    # take a network spec and return an graphtranslation.Graph
+    # take a DSGRN network spec and return an graphtranslation.Graph
     if not network_spec:
         return Graph()
     eqns = filter(bool, network_spec.split("\n"))
