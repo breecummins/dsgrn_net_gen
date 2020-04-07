@@ -1,5 +1,5 @@
 {
-  "resultsdir" : "",
+  "resultsdir" : "temp_results",
   "networkfile" : "networkspec_X1X2X3.txt",
   "nodefile" : "nodefile_X1X2X3.txt",
   "edgefile" : "",

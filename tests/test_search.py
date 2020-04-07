@@ -3,16 +3,19 @@ import subprocess, os, ast
 import dsgrn_net_gen.graphtranslation as gt
 from dsgrn_net_gen.filters import *
 import DSGRN
+from pathlib import Path
+
+Path("temp_results").mkdir(exist_ok=True)
 
 
 def run(paramfile):
     job = Job(paramfile)
     job.run()
-    ndir = subprocess.getoutput("ls -td ./dsgrn_net_gen_results*/networks*/ | head -1")
+    ndir = subprocess.getoutput("ls -td temp_results/dsgrn_net_gen_results*/networks*/ | head -1")
     resultsfile = os.path.join(ndir, "networks.txt")
     networks = ast.literal_eval(open(resultsfile).read())
     subprocess.call("rm -r " + ndir, shell=True)
-    subprocess.call("rm -r " + subprocess.getoutput("ls -td ./dsgrn_net_gen_results*/ | head -1"), shell=True)
+    subprocess.call("rm -r " + subprocess.getoutput("ls -td temp_results/dsgrn_net_gen_results*/ | head -1"), shell=True)
     return networks
 
 
@@ -120,6 +123,13 @@ def test3():
         assert(is_subgraph(original_graph,graph))
 
 
+def test4():
+    # test random seed
+    networks = run("params_X1X2X3_D.json")
+    assert(set(networks)==set(['X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n', 'X1 : (X1) : E\nX2 : (X1) : E\nX3 : (X2) : E\n', 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n']
+))
+    subprocess.call(["rm","-r", "temp_results/"])
+
 
 if __name__ == "__main__":
-    test3()
+    test4()

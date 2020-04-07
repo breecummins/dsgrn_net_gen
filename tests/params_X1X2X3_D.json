@@ -5,9 +5,10 @@
   "edgefile" : "",
   "probabilities" : {"addNode" : 0.0, "removeNode" : 0.1, "addEdge" : 0.0, "removeEdge" : 0.9},
   "range_operations" : [1,3],
-  "numneighbors" : 10,
+  "numneighbors" : 3,
   "maxparams" : 10000,
   "filters" : {},
   "time_to_wait" : 5,
-  "DSGRN_optimized" : false
+  "DSGRN_optimized" : false,
+  "random_seed" : 0
 }
