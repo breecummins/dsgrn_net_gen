@@ -332,7 +332,7 @@ def addConnectingEdges(graph, nodes, edgelist):
 
 def addEdges(graph,edgelist,numedges):
     # if no edgelist, then a random edge is added to the network
-    # if edgelist is specified, a random choice is made from the filtered edgelist 
+    # if edgelist is specified, a random choice is made from the filtered edgelist
     # (repressing self-loops removed)
 
     # get info from graph
@@ -349,13 +349,16 @@ def addEdges(graph,edgelist,numedges):
     for _ in range(numedges):
         # choose an edge from the list
         if edgelist:
-            newedge = getRandomListElement(el)
-            if newedge:
-                el.remove(newedge)
-                graph.add_edge(*newedge)
-            else:
-                # punt if can't add an edge
-                return None
+            while el:
+                newedge = getRandomListElement(el)
+                if newedge:
+                    el.remove(newedge)
+                    if newedge[:2] not in graph.edges():
+                        graph.add_edge(*newedge)
+                        break
+                else:
+                    # punt if can't add an edge
+                    return None
         # otherwise produce random edge that is not a negative self-loop
         else:
             newedge = getRandomEdge(N)
