@@ -121,7 +121,7 @@ def set_defaults(params):
         params["numperturbations"] = 1000
     if "time_to_wait" not in params:
         params["time_to_wait"] = 30
-    if "filters" not in params or not params["filters"]:
+    if "filters" not in params:
         params["filters"] = [partial(filters.is_connected,kwargs={})]
     else:
         names = list(params["filters"].keys())

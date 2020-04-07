@@ -16,7 +16,7 @@ def run(paramfile):
     return networks
 
 
-def check_size(networks,original_graph):
+def check_size(networks,original_graph=None):
     sconn = []
     conn = []
     ff = []
@@ -29,7 +29,6 @@ def check_size(networks,original_graph):
     params = []
     for netspec in networks:
         graph = gt.getGraphFromNetworkSpec(netspec)
-        issubgraph = is_subgraph(graph,original_graph)
         conn.append(is_connected(graph))
         sconn.append(is_strongly_connected(graph))
         ff.append(is_feed_forward(graph))
@@ -40,18 +39,28 @@ def check_size(networks,original_graph):
         maxoutedges = max([max([len(graph.adjacencies(v)) for v in graph.vertices()]),maxoutedges])
         minoutedges = min([min([len(graph.adjacencies(v)) for v in graph.vertices()]), minoutedges])
         params.append(DSGRN.ParameterGraph(DSGRN.Network(netspec)).size())
-    return conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params,issubgraph
+    if original_graph:
+        return conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params,is_subgraph(graph, original_graph)
+    else:
+        return conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params
 
 
 def is_subgraph(graph,subgraph):
     for v in subgraph.vertices():
-        if v not in graph.vertices() or graph.vertex_label(v) != subgraph.vertex_label(v):
+        #assume unique labels
+        if subgraph.vertex_label(v) not in [graph.vertex_label(u) for u in graph.vertices()]:
             return False
     for e in subgraph.edges():
-        if e not in graph.edges() or graph.edge_label(e[0],e[1]) != subgraph.edge_label(e[0],e[1]):
+        nt = (subgraph.vertex_label(e[0]), subgraph.vertex_label(e[1]))
+        node_translations = [(graph.vertex_label(E[0]), graph.vertex_label(E[1])) for E in graph.edges()]
+        try:
+            ind = node_translations.index(nt)
+        except ValueError:
             return False
-    else:
-        return True
+        E = graph.edges()[ind]
+        if subgraph.edge_label(e[0],e[1]) != graph.edge_label(E[0],E[1]):
+            return False
+    return True
 
 
 def test1():
@@ -73,17 +82,17 @@ def test1():
 
 def test2():
     original = open("networkspec_X1X2X3.txt").read()
-    subgraph = gt.getGraphFromNetworkSpec(original)
+    original_graph = gt.getGraphFromNetworkSpec(original)
     networks = run("params_X1X2X3_B.json")
     # for n in networks:
     #     print(n)
     #     print("\n")
     assert(len(networks)==10)
-    conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params,issubgraph = check_size(networks,subgraph)
+    conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params = check_size(networks)
     assert(all([s[0] for s in sconn]))
     assert(not any([f[0] for f in ff]))
     assert(numedges.count(5) == 0)
-    assert(issubgraph)
+    assert(is_subgraph)
     assert(all([e >= 8 for e in numedges]))
     assert(all([n >= 3 for n in numnodes]))
     assert(all([p <= 10000000 for p in params]))
@@ -91,5 +100,26 @@ def test2():
     assert(minoutedges > 0)
 
 
+def test3():
+    original = open("networkspec_X1X2X3.txt").read()
+    original_graph = gt.getGraphFromNetworkSpec(original)
+    networks = run("params_X1X2X3_C.json")
+    # for n in networks:
+    #     print(n)
+    #     print("\n")
+    assert(len(networks)==10)
+    conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params = check_size(networks)
+    assert(numedges.count(5) == 1)
+    assert(all([e <= 5 for e in numedges]))
+    assert(all([n <= 3 for n in numnodes]))
+    assert(all([p <= 10000 for p in params]))
+    for netspec in networks:
+        graph = gt.getGraphFromNetworkSpec(netspec)
+        if not is_subgraph(original_graph,graph):
+            print(graph)
+        assert(is_subgraph(original_graph,graph))
+
+
+
 if __name__ == "__main__":
-    test2()
+    test3()
