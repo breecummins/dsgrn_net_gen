@@ -3,7 +3,7 @@ import DSGRN
 import dsgrn_net_gen.graphtranslation as graphtranslation
 from functools import partial
 from inspect import getmembers, isfunction
-import NetworkPerturbations.perturbations.filters as filters
+import dsgrn_net_gen.filters as filters
 
 #####################################################################################################################
 # Function for perturbing networks.

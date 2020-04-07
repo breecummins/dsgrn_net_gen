@@ -7,7 +7,7 @@
   "range_operations" : [4,6],
   "numneighbors" : 10,
   "maxparams" : 10000000,
-  "filters" : {"is_strongly_connected" : {}, "constrained_inedges" : {"min_inedges" : 2, "max_inedges" : 3}},
+  "filters" : {"is_strongly_connected" : {}, "constrained_inedges" : {"min_inedges" : 2}},
   "time_to_wait" : 5,
   "DSGRN_optimized" : false
 }

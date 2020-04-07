@@ -87,7 +87,6 @@ def test2():
     assert(all([e >= 8 for e in numedges]))
     assert(all([n >= 3 for n in numnodes]))
     assert(all([p <= 10000000 for p in params]))
-    assert(maxinedges <= 3)
     assert(mininedges >= 2)
     assert(minoutedges > 0)
 
