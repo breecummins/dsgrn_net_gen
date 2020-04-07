@@ -1,0 +1,13 @@
+{
+  "resultsdir" : "",
+  "networkfile" : "networkspec_X1X2X3.txt",
+  "nodefile" : "nodefile_X1X2X3.txt",
+  "edgefile" : "",
+  "probabilities" : {"addNode" : 0.5, "removeNode" : 0.00, "addEdge" : 0.5, "removeEdge" : 0.0},
+  "range_operations" : [4,6],
+  "numneighbors" : 10,
+  "maxparams" : 10000000,
+  "filters" : {"is_strongly_connected" : {}, "constrained_inedges" : {"min_inedges" : 2, "max_inedges" : 3}},
+  "time_to_wait" : 5,
+  "DSGRN_optimized" : false
+}

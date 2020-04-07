@@ -226,7 +226,6 @@ def perform_operations(graph,params):
     if len(graph.vertices()) == 1 and graph.edges():
         return graph
     # otherwise continue with operations
-    graph = addConnectingEdges(graph,nodes,params["edgelist"])
     if graph and params["DSGRN_optimized"]:
         graph = addEdges_DSGRN_optimized(graph,params["edgelist"],numops[1])
     elif graph:
@@ -298,6 +297,50 @@ def addNodes(graph,nodelist,numnodes):
     return graph, nodes
 
 
+def addEdges(graph,edgelist,numedges):
+    # if no edgelist, then a random edge is added to the network
+    # if edgelist is specified, a random choice is made from the filtered edgelist
+    # (repressing self-loops removed)
+    # numedges = number of edges to add
+
+    # get info from graph
+    networknodenames = getNetworkLabels(graph)
+    N = len(networknodenames)
+    edges = set([(v, a, graph.edge_label(v, a)) for (v, a) in graph.edges()])
+
+    # get allowable edges for this graph
+    if edgelist:
+        el = list(set([tuple(getVertexFromLabel(graph, e[:2]) + [e[2]]) for e in edgelist if set(e[:2]).issubset(
+            networknodenames)]).difference(edges))
+
+    # add edges
+    for _ in range(numedges):
+        # choose an edge from the list
+        if edgelist:
+            while el:
+                newedge = getRandomListElement(el)
+                if newedge:
+                    el.remove(newedge)
+                    if newedge[:2] not in graph.edges():
+                        graph.add_edge(*newedge)
+                        break
+                else:
+                    # punt if can't add an edge
+                    return None
+        # otherwise produce random edge that is not a negative self-loop
+        else:
+            if len(graph.edges()) == len(graph.vertices())**2:
+                # stop if graph is complete
+                return None
+            newedge = getRandomEdge(N)
+            while newedge[:2] in graph.edges() or (newedge[0]==newedge[1] and newedge[2]=='r'):
+                newedge = getRandomEdge(N)
+            # since graph is not complete, an edge can always be added
+            edges.add(newedge)
+            graph.add_edge(*newedge)
+    return graph
+
+
 def addConnectingEdges(graph, nodes, edgelist):
     # add connecting edges for nodes in list
 
@@ -327,47 +370,6 @@ def addConnectingEdges(graph, nodes, edgelist):
                 newedge = (nv, newv, newr)
         graph.add_edge(*newedge)
         need = getMissingEdges(graph,nodes)
-    return graph
-
-
-def addEdges(graph,edgelist,numedges):
-    # if no edgelist, then a random edge is added to the network
-    # if edgelist is specified, a random choice is made from the filtered edgelist
-    # (repressing self-loops removed)
-
-    # get info from graph
-    networknodenames = getNetworkLabels(graph)
-    N = len(networknodenames)
-    edges = set([(v, a, graph.edge_label(v, a)) for (v, a) in graph.edges()])
-
-    # get allowable edges for this graph
-    if edgelist:
-        el = list(set([tuple(getVertexFromLabel(graph, e[:2]) + [e[2]]) for e in edgelist if set(e[:2]).issubset(
-            networknodenames)]).difference(edges))
-
-    # add edges
-    for _ in range(numedges):
-        # choose an edge from the list
-        if edgelist:
-            while el:
-                newedge = getRandomListElement(el)
-                if newedge:
-                    el.remove(newedge)
-                    if newedge[:2] not in graph.edges():
-                        graph.add_edge(*newedge)
-                        break
-                else:
-                    # punt if can't add an edge
-                    return None
-        # otherwise produce random edge that is not a negative self-loop
-        else:
-            newedge = getRandomEdge(N)
-            while newedge in edges or (newedge[0]==newedge[1] and newedge[2]=='r'):
-                newedge = getRandomEdge(N)
-            # newedge will always exist because regulation type can be swapped
-            # NOTE: multiple swaps on the same edge can occur
-            edges.add(newedge)
-            graph.add_edge(*newedge)
     return graph
 
 
