@@ -1,8 +1,12 @@
 import networkx as nx
 
 def constrained_inedges(graph,kwargs={}):
-    # kwargs = { "min_inedges" : integer, "max_inedges" : integer }
-    # return bool (True if satisfied) and string containing error message
+    '''
+    Sets min and/or max number of inedges.
+    :param graph: A dsgrn_net_gen.graphtranslation object
+    :param kwargs: A dictionary with the keys "min_inedges" and/or "max_inedges"
+    :return: (True, "") or (False, error message), True if no node has a number of inedges that fall outside the bounds (endpoint inclusive)
+    '''
     for u in graph.vertices():
         N = len([v for v in graph.vertices() if u in graph.adjacencies(v)])
         if ("min_inedges" in kwargs and N < kwargs["min_inedges"]) or ("max_inedges" in kwargs and N > kwargs["max_inedges"]):
@@ -11,8 +15,12 @@ def constrained_inedges(graph,kwargs={}):
 
 
 def constrained_outedges(graph,kwargs={}):
-    # kwargs = { "min_outedges" : integer, "max_outedges" : integer }
-    # return bool (True if satisfied) and string containing error message
+    '''
+    Sets min and/or max number of outedges.
+    :param graph: A dsgrn_net_gen.graphtranslation object
+    :param kwargs: A dictionary with the keys "min_outedges" and/or "max_outedges"
+    :return: (True, "") or (False, error message), True if no node has a number of inedges that fall outside the bounds (endpoint inclusive)
+    '''
     for u in graph.vertices():
         N = len(graph.adjacencies(u))
         if ("min_outedges" in kwargs and N < kwargs["min_outedges"]) or ("max_outedges" in kwargs and N > kwargs["max_outedges"]):
@@ -21,8 +29,12 @@ def constrained_outedges(graph,kwargs={}):
 
 
 def is_feed_forward(graph,kwargs={}):
-    # kwargs = {}, here only for API compliance
-    # return bool (True if satisfied) and string containing error message
+    '''
+    Checks if a network has no loops between two or more nodes. Self-edges allowed.
+    :param graph: A dsgrn_net_gen.graphtranslation object
+    :param kwargs: empty dictionary, here for API compliance
+    :return: (True, "") or (False, error message), True if satisfied
+    '''
     G = nx.DiGraph()
     G.add_edges_from(graph.edges())
     G.add_nodes_from(graph.vertices())
@@ -34,8 +46,12 @@ def is_feed_forward(graph,kwargs={}):
 
 
 def is_strongly_connected(graph,kwargs={}):
-    # kwargs = {}, here only for API compliance
-    # return bool (True if satisfied) and string containing error message
+    '''
+    Checks if a network has a directed path from each node to every other node.
+    :param graph: A dsgrn_net_gen.graphtranslation object
+    :param kwargs: empty dictionary, here for API compliance
+    :return: (True, "") or (False, error message), True if satisfied
+    '''
     G = nx.DiGraph()
     G.add_edges_from(graph.edges())
     G.add_nodes_from(graph.vertices())
@@ -46,8 +62,13 @@ def is_strongly_connected(graph,kwargs={}):
 
 
 def is_connected(graph,kwargs={}):
-    # kwargs = {}, here only for API compliance
-    # return bool (True if satisfied) and string containing error message
+    '''
+    Checks if a network has a sequence of edges from each node to every other node regardless of edge direction.
+    This is weak connectivity in a directed graph.
+    :param graph: A dsgrn_net_gen.graphtranslation object
+    :param kwargs: empty dictionary, here for API compliance
+    :return: (True, "") or (False, error message), True if satisfied
+    '''
     G = nx.DiGraph()
     G.add_edges_from(graph.edges())
     G.add_nodes_from(graph.vertices())
