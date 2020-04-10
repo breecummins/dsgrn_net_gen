@@ -1,5 +1,5 @@
 from dsgrn_net_gen.makejobs import Job
-import subprocess, os, ast
+import subprocess, os, ast, sys
 import dsgrn_net_gen.graphtranslation as gt
 from dsgrn_net_gen.filters import *
 import DSGRN
@@ -126,8 +126,12 @@ def test3():
 def test4():
     # test random seed
     networks = run("params_X1X2X3_D.json")
-    assert(set(networks)==set(['X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n', 'X1 : (X1) : E\nX2 : (X1) : E\nX3 : (X2) : E\n', 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n']
-))
+    if sys.version_info[1] == 7:
+        assert(set(networks)==set(['X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n', 'X1 : (X1) : E\nX2 : (X1) : E\nX3 : (X2) : E\n', 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n']))
+    elif sys.version_info[1] == 6:
+        assert(set(networks)==set(['X1 : (X1)(~X3) : E\nX3 : (X1) : E\n', 'X1 : (~X3) : E\nX2 : (X1) : E\nX3 : (X2) : E\n', 'X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n']))
+    else:
+        raise ValueError("No test written for Python version {}.{}".format(sys.version_info[0],sys.version_info[1]))
     subprocess.call(["rm","-r", "temp_results/"])
 
 
