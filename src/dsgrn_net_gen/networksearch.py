@@ -59,6 +59,9 @@ def perturbNetwork(params, network_spec):
     # Initialize
     networks = set([])
     params, starting_graph = setup(params,network_spec)
+    for (u,w) in starting_graph.edges():
+        if u == w and starting_graph.edge_label(u,w) == "r":
+            raise ValueError("Seed network has a self-repressing edge. Not currently supported by DSGRN.")
     starting_netspec = graphtranslation.createEssentialNetworkSpecFromGraph(starting_graph)
     if enforce_filters(starting_graph,starting_netspec,params):
         # add the starting network if it meets the filtering criteria
@@ -104,6 +107,8 @@ def setup(params,network_spec):
         params["edgelist"] = filter_edgelist(params["edgelist"])
     # make sure probabilities are normalized and take the cumsum
     params["probabilities"] = make_probability_vector(params["probabilities"])
+    # make range_operations end-point inclusive
+    params["range_operations"] = [params["range_operations"][0],params["range_operations"][1]+1]
     seed = time.time() if "random_seed" not in params else params["random_seed"]
     random.seed(seed)
     # make starting graph, make sure network_spec is essential, and add network_spec to list of networks
@@ -116,9 +121,6 @@ def set_defaults(params):
         params["nodelist"] = []
     if "edgelist" not in params:
         params["edgelist"] = []
-    params["range_operations"] = [params["range_operations"][0],params["range_operations"][1]+1]
-    if "numperturbations" not in params:
-        params["numperturbations"] = 1000
     if "time_to_wait" not in params:
         params["time_to_wait"] = 30
     if "filters" not in params:
