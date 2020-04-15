@@ -1,10 +1,11 @@
 from dsgrn_net_gen.makejobs import Job
-import subprocess, os, ast, sys
+import subprocess, os, ast, sys, shutil
 import dsgrn_net_gen.graphtranslation as gt
 from dsgrn_net_gen.filters import *
 import DSGRN
 from pathlib import Path
 
+shutil.rmtree('temp_results', ignore_errors=True)
 Path("temp_results").mkdir(exist_ok=True)
 
 
