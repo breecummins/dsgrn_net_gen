@@ -242,19 +242,19 @@ def perform_operations(graph,params):
     # choose the number of each type of operation
     numops = choose_operations(params)
     # apply operations in the proper order
-    graph, nodes = addNodes(graph, params["nodelist"],numops[0])
-    # punt if the graph is trivial
-    if len(graph.vertices()) == 1 and graph.edges():
-        return graph
-    # otherwise continue with operations
+    if graph:
+        graph,num_edges = removeNodes(graph,numops[3])
+    else:
+        num_edges = 0
+    if graph:
+        ne = numops[2] - num_edges
+        if ne > 0:
+            graph = removeEdges(graph,ne)
+    graph = addNodes(graph, params["nodelist"],numops[0])
     if graph and params["DSGRN_optimized"]:
         graph = addEdges_DSGRN_optimized(graph,params["edgelist"],numops[1])
     elif graph:
         graph = addEdges(graph, params["edgelist"], numops[1])
-    if graph:
-        graph = removeEdges(graph,numops[2])
-    if graph:
-        graph = removeNodes(graph,numops[3])
     return graph
 
 
@@ -271,6 +271,7 @@ def choose_operations(params):
             probs.pop(0)
     return numops
 
+
 ################################################################################################
 # Basic add and remove methods of the network perturbation.
 ################################################################################################
@@ -286,15 +287,17 @@ def removeEdges(graph,numedges):
 def removeNodes(graph,numnodes):
     if len(graph.vertices()) <= numnodes:
         return None
+    numedges = 0
     for _ in range(numnodes):
-        graph.remove_vertex(random.choice(list(graph.vertices())))
-    return graph
+        node = random.choice(list(graph.vertices()))
+        numedges += sum([1 for e in graph.edges() if node in e])
+        graph.remove_vertex(node)
+    return graph,numedges
 
 
 def addNodes(graph,nodelist,numnodes):
     # if nodelist, choose numnodes random nodes from nodelist
     # if no nodelist, make up names for new nodes
-    nodes = []
     for _ in range(numnodes):
         networknodenames = getNetworkLabels(graph)
         N = len(networknodenames)
@@ -314,8 +317,7 @@ def addNodes(graph,nodelist,numnodes):
         # add to graph
         if newnodelabel:
             graph.add_vertex(N,label=newnodelabel)
-            nodes.append(N)
-    return graph, nodes
+    return graph
 
 
 def addEdges(graph,edgelist,numedges):

@@ -73,9 +73,6 @@ def test1():
     original = open("networkspec_X1X2X3.txt").read()
     subgraph = gt.getGraphFromNetworkSpec(original)
     networks = run("params_X1X2X3_A.json")
-    # for n in networks:
-    #     print(n)
-    #     print("\n")
     assert(len(networks)==10)
     conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params,issubgraph = check_size(networks,subgraph)
     assert(all([s[0] for s in conn]))
@@ -87,12 +84,7 @@ def test1():
 
 
 def test2():
-    original = open("networkspec_X1X2X3.txt").read()
-    original_graph = gt.getGraphFromNetworkSpec(original)
     networks = run("params_X1X2X3_B.json")
-    # for n in networks:
-    #     print(n)
-    #     print("\n")
     assert(len(networks)==10)
     conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params = check_size(networks)
     assert(all([s[0] for s in sconn]))
@@ -110,9 +102,6 @@ def test3():
     original = open("networkspec_X1X2X3.txt").read()
     original_graph = gt.getGraphFromNetworkSpec(original)
     networks = run("params_X1X2X3_C.json")
-    # for n in networks:
-    #     print(n)
-    #     print("\n")
     assert(len(networks)==10)
     conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params = check_size(networks)
     assert(numedges.count(5) == 1)
@@ -121,21 +110,7 @@ def test3():
     assert(all([p <= 10000 for p in params]))
     for netspec in networks:
         graph = gt.getGraphFromNetworkSpec(netspec)
-        if not is_subgraph(original_graph,graph):
-            print(graph)
         assert(is_subgraph(original_graph,graph))
-
-
-# def test4():
-#     # test random seed -- can't do this, depends on architecture
-#     networks = run("params_X1X2X3_D.json")
-#     if sys.version_info[1] == 7:
-#         assert(set(networks)==set(['X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n', 'X1 : (X1) : E\nX2 : (X1) : E\nX3 : (X2) : E\n', 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n']))
-#     elif sys.version_info[1] == 6:
-#         assert(set(networks)==set(['X1 : (X1)(~X3) : E\nX3 : (X1) : E\n', 'X1 : (~X3) : E\nX2 : (X1) : E\nX3 : (X2) : E\n', 'X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n']))
-#     else:
-#         raise ValueError("No test written for Python version {}.{}".format(sys.version_info[0],sys.version_info[1]))
-#     subprocess.call(["rm","-r", "temp_results/"])
 
 
 def test4():
@@ -199,8 +174,29 @@ def test6():
         assert(str(v)=="Seed network has a multiedge. Not currently supported by DSGRN.")
 
 
+def test7():
+    # check node removal
+    original = open("networkspec_X1X2X3.txt").read()
+    original_graph = gt.getGraphFromNetworkSpec(original)
+    networks = run("params_X1X2X3_E.json")
+    # Note: 'X2 : \nX3 : (X2)\n' will not be produced using Shaun's repository (0 out-edges not allowed)
+    assert(set(networks).issubset(set(['X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n', 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n', 'X1 : (X1) : E\nX2 : (X1) : E\n','X2 :  : E\nX3 : (X2) : E\n'])))
+    for _ in range(10):
+        graph,numedges = ns.removeNodes(original_graph.clone(),1)
+        spec = gt.createEssentialNetworkSpecFromGraph(graph)
+        if spec == 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n':
+            assert(numedges == 2)
+        elif spec == 'X1 : (X1) : E\nX2 : (X1) : E\n':
+            assert(numedges == 3)
+        elif 'X2 :  : E\nX3 : (X2) : E\n':
+            assert(numedges == 4)
 
+
+def test8():
+    # make sure regulation can swap
+    networks = run("params_short.json")
+    assert('X1 : (X1)(~X3) : E\nX2 : (~X1) : E\nX3 : (X1 + X2) : E\n' in networks)
 
 
 if __name__ == "__main__":
-    test6()
+    test8()
