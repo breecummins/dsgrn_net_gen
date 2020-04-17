@@ -100,8 +100,10 @@ def perturbNetwork(params, network_spec):
 ##########################################################################################
 
 def setup(params,network_spec):
+    # make starting graph, make sure network_spec is essential, and add network_spec to list of networks
+    starting_graph = graphtranslation.getGraphFromNetworkSpec(network_spec)
     # set defaults
-    params = set_defaults(params)
+    params = set_defaults(params,starting_graph)
     # remove negative self-regulation from edgelist
     if params["edgelist"]:
         params["edgelist"] = filter_edgelist(params["edgelist"])
@@ -111,16 +113,24 @@ def setup(params,network_spec):
     params["range_operations"] = [params["range_operations"][0],params["range_operations"][1]+1]
     seed = time.time() if "random_seed" not in params else params["random_seed"]
     random.seed(seed)
-    # make starting graph, make sure network_spec is essential, and add network_spec to list of networks
-    starting_graph = graphtranslation.getGraphFromNetworkSpec(network_spec)
     return params, starting_graph
 
 
-def set_defaults(params):
-    if "nodelist" not in params:
+def set_defaults(params,starting_graph):
+    if "nodelist" not in params or not params["nodelist"]:
         params["nodelist"] = []
-    if "edgelist" not in params:
+    else:
+        nodeset = set(params["nodelist"])
+        for v in starting_graph.vertices():
+            nodeset.add(starting_graph.vertex_label(v))
+        params["nodelist"] = list(nodeset)
+    if "edgelist" not in params or not params["edgelist"]:
         params["edgelist"] = []
+    else:
+        edgeset = set(params["edgelist"])
+        for (u,v) in starting_graph.edges():
+            edgeset.add((starting_graph.vertex_label(u),starting_graph.vertex_label(v),starting_graph.edge_label(u,v)))
+        params["edgelist"] = list(edgeset)
     if "time_to_wait" not in params:
         params["time_to_wait"] = 30
     if "filters" not in params:

@@ -1,9 +1,11 @@
 from dsgrn_net_gen.makejobs import Job
-import subprocess, os, ast, sys, shutil
+import subprocess, os, ast, sys, shutil, json
 import dsgrn_net_gen.graphtranslation as gt
+import dsgrn_net_gen.networksearch as ns
 from dsgrn_net_gen.filters import *
 import DSGRN
 from pathlib import Path
+from dsgrn_net_gen.fileparsers import parseEdgeFile, parseNodeFile
 
 shutil.rmtree('temp_results', ignore_errors=True)
 Path("temp_results").mkdir(exist_ok=True)
@@ -134,7 +136,42 @@ def test3():
 #     else:
 #         raise ValueError("No test written for Python version {}.{}".format(sys.version_info[0],sys.version_info[1]))
 #     subprocess.call(["rm","-r", "temp_results/"])
-#
+
+
+def test4():
+    # check that original edges are added to edgelist
+    params = json.load(open("params_X1X2X3_A.json"))
+    network_spec = open(params["networkfile"]).read()
+    edgelist = parseEdgeFile(params["edgefile"])
+    nodelist = parseNodeFile(params["nodefile"])
+    params["edgelist"] = edgelist
+    params["nodelist"] = nodelist
+    params, starting_graph = ns.setup(params,network_spec)
+    assert(len(params["edgelist"]) == len(edgelist)+5)
+    assert(("X1","X1","a") in params["edgelist"] and ("X3","X1","r") in params["edgelist"] and ("X1","X2","a") in params["edgelist"] and ("X1","X3","a") in params["edgelist"] and ("X2","X3","a") in params["edgelist"])
+    assert(set(params["nodelist"]) == set(["X1","X2","X3","X4","X5"]))
+
+
+def test5():
+    # check that original edges are not added to empty edgelist
+    params = json.load(open("params_X1X2X3_C.json"))
+    network_spec = open(params["networkfile"]).read()
+    if "edgefile" in params and params["edgefile"].strip():
+        edgelist = parseEdgeFile(params["edgefile"])
+    else:
+        edgelist = None
+    if "nodefile" in params and params["nodefile"].strip():
+        nodelist = parseNodeFile(params["nodefile"])
+    else:
+        nodelist = None
+    params["edgelist"] = edgelist
+    params["nodelist"] = nodelist
+    params, starting_graph = ns.setup(params,network_spec)
+    assert(params["edgelist"] == [])
+    assert(("X1","X1","a") not in params["edgelist"] and ("X3","X1","r") not in params["edgelist"] and ("X1","X2","a") not in params["edgelist"] and ("X1","X3","a") not in params["edgelist"] and ("X2","X3","a") not in params["edgelist"])
+    assert(params["nodelist"] == [])
+
+
 
 if __name__ == "__main__":
-    test1()
+    test2()
