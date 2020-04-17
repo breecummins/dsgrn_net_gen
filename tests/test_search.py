@@ -172,6 +172,35 @@ def test5():
     assert(params["nodelist"] == [])
 
 
+def test6():
+    # sanity check edges of starting network
+    network_spec = open("networkspec_with_selfrep.txt").read()
+    starting_graph = gt.getGraphFromNetworkSpec(network_spec)
+    try:
+        ns.sanity_check_edges(network_spec,starting_graph)
+        raise RuntimeError("Shouldn't pass this test.")
+    except ValueError as v:
+        assert(str(v)=="Seed network has a self-repressing edge. Not currently supported by DSGRN.")
+
+    network_spec = open("networkspec_with_multiedges.txt").read()
+    starting_graph = gt.getGraphFromNetworkSpec(network_spec)
+    try:
+        ns.sanity_check_edges(network_spec,starting_graph)
+        raise RuntimeError("Shouldn't pass this test.")
+    except ValueError as v:
+        assert(str(v)=="Seed network has a multiedge. Not currently supported by DSGRN.")
+
+    network_spec = open("networkspec_with_multiedges2.txt").read()
+    starting_graph = gt.getGraphFromNetworkSpec(network_spec)
+    try:
+        ns.sanity_check_edges(network_spec,starting_graph)
+        raise RuntimeError("Shouldn't pass this test.")
+    except ValueError as v:
+        assert(str(v)=="Seed network has a multiedge. Not currently supported by DSGRN.")
+
+
+
+
 
 if __name__ == "__main__":
-    test2()
+    test6()

@@ -59,9 +59,7 @@ def perturbNetwork(params, network_spec):
     # Initialize
     networks = set([])
     params, starting_graph = setup(params,network_spec)
-    for (u,w) in starting_graph.edges():
-        if u == w and starting_graph.edge_label(u,w) == "r":
-            raise ValueError("Seed network has a self-repressing edge. Not currently supported by DSGRN.")
+    sanity_check_edges(network_spec,starting_graph)
     starting_netspec = graphtranslation.createEssentialNetworkSpecFromGraph(starting_graph)
     if enforce_filters(starting_graph,starting_netspec,params):
         # add the starting network if it meets the filtering criteria
@@ -163,6 +161,17 @@ def make_probability_vector(probabilities):
     probs = [probabilities[k] for k in ["addNode","addEdge","removeEdge","removeNode"]]
     cs =  list(itertools.accumulate(probs))
     return [c/cs[-1] for c in cs]
+
+
+def sanity_check_edges(network_spec,starting_graph):
+    try:
+        DSGRN.Network(network_spec)
+    except RuntimeError as r:
+        if str(r) == "Problem parsing network specification file: Repeated inputs in logic":
+            raise ValueError("Seed network has a multiedge. Not currently supported by DSGRN.")
+    for (u,w) in starting_graph.edges():
+        if u == w and starting_graph.edge_label(u,w) == "r":
+            raise ValueError("Seed network has a self-repressing edge. Not currently supported by DSGRN.")
 
 
 ##########################################################################################
