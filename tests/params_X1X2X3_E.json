@@ -1,0 +1,13 @@
+{
+  "resultsdir" : "temp_results",
+  "networkfile" : "networkspec_X1X2X3.txt",
+  "nodefile" : "",
+  "edgefile" : "",
+  "probabilities" : {"addNode" : 0.0, "removeNode" : 1.0, "addEdge" : 0.0, "removeEdge" : 0.0},
+  "range_operations" : [1,1],
+  "numneighbors" : 4,
+  "maxparams" : 200,
+  "filters" : {},
+  "time_to_wait" : 1,
+  "DSGRN_optimized" : false
+}

@@ -59,9 +59,7 @@ def perturbNetwork(params, network_spec):
     # Initialize
     networks = set([])
     params, starting_graph = setup(params,network_spec)
-    for (u,w) in starting_graph.edges():
-        if u == w and starting_graph.edge_label(u,w) == "r":
-            raise ValueError("Seed network has a self-repressing edge. Not currently supported by DSGRN.")
+    sanity_check_edges(network_spec,starting_graph)
     starting_netspec = graphtranslation.createEssentialNetworkSpecFromGraph(starting_graph)
     if enforce_filters(starting_graph,starting_netspec,params):
         # add the starting network if it meets the filtering criteria
@@ -100,8 +98,10 @@ def perturbNetwork(params, network_spec):
 ##########################################################################################
 
 def setup(params,network_spec):
+    # make starting graph, make sure network_spec is essential, and add network_spec to list of networks
+    starting_graph = graphtranslation.getGraphFromNetworkSpec(network_spec)
     # set defaults
-    params = set_defaults(params)
+    params = set_defaults(params,starting_graph)
     # remove negative self-regulation from edgelist
     if params["edgelist"]:
         params["edgelist"] = filter_edgelist(params["edgelist"])
@@ -111,16 +111,24 @@ def setup(params,network_spec):
     params["range_operations"] = [params["range_operations"][0],params["range_operations"][1]+1]
     seed = time.time() if "random_seed" not in params else params["random_seed"]
     random.seed(seed)
-    # make starting graph, make sure network_spec is essential, and add network_spec to list of networks
-    starting_graph = graphtranslation.getGraphFromNetworkSpec(network_spec)
     return params, starting_graph
 
 
-def set_defaults(params):
-    if "nodelist" not in params:
+def set_defaults(params,starting_graph):
+    if "nodelist" not in params or not params["nodelist"]:
         params["nodelist"] = []
-    if "edgelist" not in params:
+    else:
+        nodeset = set(params["nodelist"])
+        for v in starting_graph.vertices():
+            nodeset.add(starting_graph.vertex_label(v))
+        params["nodelist"] = list(nodeset)
+    if "edgelist" not in params or not params["edgelist"]:
         params["edgelist"] = []
+    else:
+        edgeset = set(params["edgelist"])
+        for (u,v) in starting_graph.edges():
+            edgeset.add((starting_graph.vertex_label(u),starting_graph.vertex_label(v),starting_graph.edge_label(u,v)))
+        params["edgelist"] = list(edgeset)
     if "time_to_wait" not in params:
         params["time_to_wait"] = 30
     if "filters" not in params:
@@ -153,6 +161,17 @@ def make_probability_vector(probabilities):
     probs = [probabilities[k] for k in ["addNode","addEdge","removeEdge","removeNode"]]
     cs =  list(itertools.accumulate(probs))
     return [c/cs[-1] for c in cs]
+
+
+def sanity_check_edges(network_spec,starting_graph):
+    try:
+        DSGRN.Network(network_spec)
+    except RuntimeError as r:
+        if str(r) == "Problem parsing network specification file: Repeated inputs in logic":
+            raise ValueError("Seed network has a multiedge. Not currently supported by DSGRN.")
+    for (u,w) in starting_graph.edges():
+        if u == w and starting_graph.edge_label(u,w) == "r":
+            raise ValueError("Seed network has a self-repressing edge. Not currently supported by DSGRN.")
 
 
 ##########################################################################################
@@ -223,19 +242,19 @@ def perform_operations(graph,params):
     # choose the number of each type of operation
     numops = choose_operations(params)
     # apply operations in the proper order
-    graph, nodes = addNodes(graph, params["nodelist"],numops[0])
-    # punt if the graph is trivial
-    if len(graph.vertices()) == 1 and graph.edges():
-        return graph
-    # otherwise continue with operations
+    if graph:
+        graph,num_edges = removeNodes(graph,numops[3])
+    else:
+        num_edges = 0
+    if graph:
+        ne = numops[2] - num_edges
+        if ne > 0:
+            graph = removeEdges(graph,ne)
+    graph = addNodes(graph, params["nodelist"],numops[0])
     if graph and params["DSGRN_optimized"]:
         graph = addEdges_DSGRN_optimized(graph,params["edgelist"],numops[1])
     elif graph:
         graph = addEdges(graph, params["edgelist"], numops[1])
-    if graph:
-        graph = removeEdges(graph,numops[2])
-    if graph:
-        graph = removeNodes(graph,numops[3])
     return graph
 
 
@@ -252,6 +271,7 @@ def choose_operations(params):
             probs.pop(0)
     return numops
 
+
 ################################################################################################
 # Basic add and remove methods of the network perturbation.
 ################################################################################################
@@ -267,15 +287,17 @@ def removeEdges(graph,numedges):
 def removeNodes(graph,numnodes):
     if len(graph.vertices()) <= numnodes:
         return None
+    numedges = 0
     for _ in range(numnodes):
-        graph.remove_vertex(random.choice(list(graph.vertices())))
-    return graph
+        node = random.choice(list(graph.vertices()))
+        numedges += sum([1 for e in graph.edges() if node in e])
+        graph.remove_vertex(node)
+    return graph,numedges
 
 
 def addNodes(graph,nodelist,numnodes):
     # if nodelist, choose numnodes random nodes from nodelist
     # if no nodelist, make up names for new nodes
-    nodes = []
     for _ in range(numnodes):
         networknodenames = getNetworkLabels(graph)
         N = len(networknodenames)
@@ -295,8 +317,7 @@ def addNodes(graph,nodelist,numnodes):
         # add to graph
         if newnodelabel:
             graph.add_vertex(N,label=newnodelabel)
-            nodes.append(N)
-    return graph, nodes
+    return graph
 
 
 def addEdges(graph,edgelist,numedges):
