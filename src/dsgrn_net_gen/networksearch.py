@@ -286,7 +286,7 @@ def removeEdges(graph,numedges):
 
 def removeNodes(graph,numnodes):
     if len(graph.vertices()) <= numnodes:
-        return None
+        return None, None
     numedges = 0
     for _ in range(numnodes):
         node = random.choice(list(graph.vertices()))

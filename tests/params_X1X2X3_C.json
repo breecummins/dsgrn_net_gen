@@ -8,6 +8,6 @@
   "numneighbors" : 10,
   "maxparams" : 10000,
   "filters" : {},
-  "time_to_wait" : 5,
+  "time_to_wait" :2,
   "DSGRN_optimized" : false
 }

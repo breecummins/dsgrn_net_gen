@@ -102,7 +102,7 @@ def test3():
     original = open("networkspec_X1X2X3.txt").read()
     original_graph = gt.getGraphFromNetworkSpec(original)
     networks = run("params_X1X2X3_C.json")
-    assert(len(networks)==10)
+    assert(len(networks)==9)
     conn, sconn, ff, numnodes, numedges, mininedges, maxinedges, minoutedges, maxoutedges,params = check_size(networks)
     assert(numedges.count(5) == 1)
     assert(all([e <= 5 for e in numedges]))
@@ -199,4 +199,4 @@ def test8():
 
 
 if __name__ == "__main__":
-    test8()
+    test3()
