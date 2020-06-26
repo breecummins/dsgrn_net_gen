@@ -431,6 +431,8 @@ def addEdges_DSGRN_optimized(graph,edgelist,numedges):
 
 def getNetworkLabels(graph):
     # need node names to choose new nodes/edges
+    if graph is None:
+        return []
     return [ graph.vertex_label(v) for v in graph.vertices() ]
 
 def getVertexFromLabel(graph,nodelabels):
