@@ -2,9 +2,9 @@
 
 This module accepts DSGRN network specifications and generates a collection of DSGRN-computable networks in the neighborhood of the input network(s), subject to constraints in a parameter file in .json format.
 
-__References:__ http://epubs.siam.org/doi/abs/10.1137/15M1052743, https://link.springer.com/chapter/10.1007/978-3-319-67471-1_19, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5975363/, https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006121
-
 __Dependencies:__ Python 3.6/3.7, networkx, DSGRN (https://github.com/shaunharker/DSGRN or https://github.com/marciogameiro/DSGRN) and its dependencies.
+
+__DSGRN References:__ http://epubs.siam.org/doi/abs/10.1137/15M1052743, https://link.springer.com/chapter/10.1007/978-3-319-67471-1_19, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5975363/, https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006121
 
 To install, do
 ```bash    
@@ -32,7 +32,7 @@ job = Job("params.json")
 job.run()
 ```
 
-The keywords in the .json parameter dictionary are given as follows.
+The keywords in the .json parameter dictionary are given as follows. See the `tests` folder for example parameter .json files.
 
 # Parameters 
 __Required:__
@@ -109,7 +109,7 @@ __NOTES:__
 * New filters can be implemented in `dsgrn_net_gen.filters` to provide more complex constraints on the neighborhood search. The API is 
     
         new_function(graph,kwargs={})
-    where `graph` is a graph object from `dsgrn_net_gen.graphtranslation`. 
+    where `graph` is a graph object from `dsgrn_net_gen.graphtranslation`. Output is `True, ""` or `False, "warning message"`.
 
 # Output
 
@@ -144,23 +144,23 @@ The functions in `filters` also bias which networks are accepted during the sear
 
 # Troubleshooting
 
-During the search process, there are running summary statements printed to standard output showing the current state of the search. The output `Accepted networks : # networks` tells the user how many networks have been accepted into the perturbations list so far. The other messages can help a user figure out what is happening if not enough networks are being produced. The warnings include
+During the search process, there are running summary statements printed to standard output showing the current state of the search. The output `Accepted: # networks` tells the user how many networks have been accepted so far. The other messages can help a user figure out what is happening if not enough networks are being produced. The warnings include
 
 ```
-    Aborted networks : # networks
-    Too many parameters : # networks
-    Network spec not computable : # networks   
+    Aborted: # networks
+    Too many params: # networks
+    Not computable: # networks   
 ```
 
-`Aborted networks` are those networks for which there are not enough nodes and/or edges left to satisfy the number of requested operations. In particular, `nodefile` or `edgefile` may have too few entries, the empty graph may have been produced and further removals are requested, or the complete graph may have been produced and further additions are requested. `Too many parameters` means the networks were rejected because the number of DSGRN parameters exceeded `maxparams`. `Network spec not computable` means that the network cannot be computed by DSGRN. This means that there are too many in-edges at some node, too many out-edges at some node, or (as of this writing) 0 out-edges at some node. DSGRN is limited to a certain number of in- and out-edges. At the time of this writing, 5 in-edges or 5 out-edges is likely too many (although not always).
+`Aborted` networks are those networks for which there are not enough nodes and/or edges left to satisfy the number of requested operations. In particular, `nodefile` or `edgefile` may have too few entries, the empty graph may have been produced and further removals are requested, or the complete graph may have been produced and further additions are requested. `Too many params` means the networks were rejected because the number of DSGRN parameters exceeded `maxparams` as specified in the parameter .json file. `Not computable` means that the network cannot be computed by DSGRN. This means that there are too many in-edges at some node, too many out-edges at some node, or (as of this writing) 0 out-edges at some node. DSGRN is limited to a certain number of in- and out-edges. At the time of this writing, 5 in-edges or 5 out-edges is likely too many (although not always).
 
 In addition, there are specific warnings for each filter in `filters`, and these are self-explanatory if a user understands the `filters` they specify. At the time of this writing, the filter messages include
  ```
- Not connected : # networks
- Not strongly connected : # networks
- Not feed-forward : # networks
- Number of out-edges not in range : # networks
- Number of in-edges not in range : # networks
+ Not connected: # networks
+ Not strongly connected: # networks
+ Not feed-forward: # networks
+ Out-edges not in range: # networks
+ In-edges not in range: # networks
  ```
  
 
@@ -177,19 +177,19 @@ In addition, there are specific warnings for each filter in `filters`, and these
         pg.size()
         ```
        where `"networkfile.txt"` is a single DSGRN network specification (i.e., is not a list of specifications). You can also initialize a `DSGRN.Network` object with a network specification as a string rather than in a file. So you can copy a specific network out of a file or off the commandline. If the seed network is not DSGRN computable, you can add edges until it is strongly connected and check the number of parameters. If any node has too many in- or out-edges, then the network will also not be DSGRN computable.
-     * The `node_file` path is specified, but points to a file with no new nodes to add, and the only non-zero `probabilities` parameter is `addNode`. 
+     * The `nodefile` path is specified, but points to a file with no new nodes to add, and the only non-zero `probabilities` parameter is `addNode`. 
     
-     * The `edge_file` path is specified, but points to a file with no new edges to add, and the only non-zero `probabilities` parameter is `addEdge`. 
+     * The `edgefile` path is specified, but points to a file with no new edges to add, and the only non-zero `probabilities` parameter is `addEdge`. 
 
-     * The `edge_file` has only non-allowable edges, such as negative self-loops (which are never added to the network); or edges that can only result in a non-computable network and the `probabilities` for removing nodes and edges are zero.
+     * The `edgefile` has only non-allowable edges, such as negative self-loops (which are never added to the network); or edges that can only result in a non-computable network and the `probabilities` for removing nodes and edges are zero.
          
-     * The `edge_file` has only edges that connect nodes that are not in `node_file` or in the seed network.
+     * The `edgefile` has only edges that connect nodes that are not in `node_file` or in the seed network.
 
 2. There are many fewer networks produced than requested.
     * The `time_to_wait` parameter may be too small.
     * The specified `filters` may be too restrictive.
     * `range_operations` can be either too permissive, leading to a huge network space that is hard to search, or too restrictive, limiting the search to a very small neighborhood. Hopefully there is a clue in the process summary described in the Troubleshooting section. 
-    * Constraints in the `node_file` and `edge_file` lists of nodes and edges can limit the number of networks that is possible to construct. Be aware that files with few nodes and/or edges can reduce the number of permissible networks.
+    * Constraints in the `nodefile` and `edgefile` lists of nodes and edges can limit the number of networks that is possible to construct. Be aware that files with few nodes and/or edges can reduce the number of permissible networks.
     * The `probabilities` parameter may emphasizing the wrong kind of operations. For example, if `addNode = 0.1` and `addEdge = 0.9`, but you only have 2 nodes to begin with, then there could be very few networks that meet all specified criteria, and it could take a very long sampling time to find any networks with substantially more nodes. Note that there's an interplay with `range_operations` here. If `range_operations = [1,10]`, then you're likely to get at least a few networks with more nodes, but if `range_operations = [1,3]`, then it will be hard to find networks with more nodes.
     
 3. Unexpected nodes and edges are added. 

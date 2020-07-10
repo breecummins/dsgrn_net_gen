@@ -78,7 +78,7 @@ def perturbNetwork(params, network_spec):
             if enforce_filters(graph,netspec,params):
                 networks.add(netspec)
         else:
-            params["msg_dict"]["Aborted networks"] += 1
+            params["msg_dict"]["Aborted"] += 1
         if not count%1000 and params["compressed_output"]:
             update_line(params["msg_dict"],len(networks))
 
@@ -142,7 +142,7 @@ def set_defaults(params,starting_graph):
         params["filters"] = [partial(o[1],kwargs=params["filters"][o[0]]) for o in funcs]
     if "compressed_output" not in params:
         params["compressed_output"] = True
-    params["msg_dict"] = {"Accepted networks" : 0, "Aborted networks" : 0}
+    params["msg_dict"] = {"Accepted" : 0, "Aborted" : 0}
     if "DSGRN_optimized" not in params:
         params["DSGRN_optimized"] = True
     return params
@@ -187,7 +187,7 @@ def enforce_filters(graph,netspec,params):
 
 def check_computability(params,network_spec):
     if not network_spec:
-        msg = "Network spec not computable"
+        msg = "Not computable"
         add_warning(msg, network_spec, params["compressed_output"], params["msg_dict"])
         return False
     network = DSGRN.Network(network_spec)
@@ -195,11 +195,11 @@ def check_computability(params,network_spec):
         paramgraph=DSGRN.ParameterGraph(network)
         smallenough = paramgraph.size() <= params['maxparams']
         if not smallenough:
-            msg = "Too many parameters"
+            msg = "Too many params"
             add_warning(msg,network_spec, params["compressed_output"], params["msg_dict"])
         return smallenough
     except (AttributeError, RuntimeError):
-        msg = "Network spec not computable"
+        msg = "Not computable"
         add_warning(msg, network_spec, params["compressed_output"], params["msg_dict"])
         return False
 
@@ -225,8 +225,8 @@ def add_warning(msg,network_spec,compressed_output,msg_dict):
 
 
 def update_line(msg_dict,N):
-    msg_dict["Accepted networks"] = N
-    mstr = "; ".join([msg + ": {} networks".format(count) for msg,count in msg_dict.items()])
+    msg_dict["Accepted"] = N
+    mstr = "; ".join([msg + ": {}".format(count) for msg,count in msg_dict.items()])
     sys.stdout.write("\b" * len(mstr))
     sys.stdout.write(" " * len(mstr))
     sys.stdout.write("\b" * len(mstr))

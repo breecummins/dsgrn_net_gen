@@ -10,7 +10,7 @@ def constrained_inedges(graph,kwargs={}):
     for u in graph.vertices():
         N = len([v for v in graph.vertices() if u in graph.adjacencies(v)])
         if ("min_inedges" in kwargs and N < kwargs["min_inedges"]) or ("max_inedges" in kwargs and N > kwargs["max_inedges"]):
-            return False, "Number of in-edges not in range"
+            return False, "In-edges not in range"
     return True, ""
 
 
@@ -24,7 +24,7 @@ def constrained_outedges(graph,kwargs={}):
     for u in graph.vertices():
         N = len(graph.adjacencies(u))
         if ("min_outedges" in kwargs and N < kwargs["min_outedges"]) or ("max_outedges" in kwargs and N > kwargs["max_outedges"]):
-            return False, "Number of out-edges not in range"
+            return False, "Out-edges not in range"
     return True, ""
 
 
