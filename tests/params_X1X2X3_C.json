@@ -9,5 +9,6 @@
   "maxparams" : 10000,
   "filters" : {},
   "time_to_wait" :2,
+  "filters" : {"constrained_outedges" : {"min_outedges" : 1}},
   "DSGRN_optimized" : false
 }
