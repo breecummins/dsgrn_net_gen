@@ -110,6 +110,7 @@ def setup(params,network_spec):
     # make range_operations end-point inclusive
     params["range_operations"] = [params["range_operations"][0],params["range_operations"][1]+1]
     seed = time.time() if "random_seed" not in params else params["random_seed"]
+    params["random_seed"] = seed
     random.seed(seed)
     return params, starting_graph
 
