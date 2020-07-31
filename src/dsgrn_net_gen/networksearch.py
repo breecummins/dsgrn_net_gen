@@ -49,7 +49,7 @@ def perturbNetwork(params, network_spec):
                             to nodes missing in- or out-edges, which can decrease computation time.
                             Set to False to remove this bias.
                             NOTE: Can still get nodes without in- or out-edges if probabilities["removeEdge"] is nonzero
-        "random_seed" : optional random seed for repeatability, default = time.time() for stochastic results
+        "random_seed" : random seed (set to time.time() for stochastic results in make_jobs.py)
     :param network_spec: DSGRN network specification string
     :return: list of essential DSGRN network specification strings
 
@@ -109,9 +109,7 @@ def setup(params,network_spec):
     params["probabilities"] = make_probability_vector(params["probabilities"])
     # make range_operations end-point inclusive
     params["range_operations"] = [params["range_operations"][0],params["range_operations"][1]+1]
-    seed = time.time() if "random_seed" not in params else params["random_seed"]
-    params["random_seed"] = seed
-    random.seed(seed)
+    random.seed(params["random_seed"])
     return params, starting_graph
 
 

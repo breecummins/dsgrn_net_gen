@@ -1,6 +1,6 @@
 import dsgrn_net_gen.networksearch as networksearch
 import dsgrn_net_gen.fileparsers as fileparsers
-import subprocess, os, json, shutil, ast, sys
+import subprocess, os, json, shutil, ast, sys, time
 
 
 class Job():
@@ -11,8 +11,10 @@ class Job():
         # use datetime as unique identifier to avoid overwriting
         if "datetime" not in self.params:
             datetime = subprocess.check_output(['date +%Y_%m_%d_%H_%M_%S'],shell=True).decode(sys.stdout.encoding).strip()
+            self.params["datetime"] = datetime
         else:
             datetime = self.params["datetime"]
+        self.params["random_seed"] = time.time() if "random_seed" not in self.params else self.params["random_seed"]
         resultsdir = "" if "resultsdir" not in self.params else self.params["resultsdir"]
         resultsdir =os.path.join(os.path.expanduser(resultsdir), "dsgrn_net_gen_results"+datetime)
         self.perturbationsdir = os.path.join(resultsdir,"networks"+datetime)
@@ -20,6 +22,7 @@ class Job():
         self.inputfilesdir = os.path.join(resultsdir,"inputs"+datetime)
         os.makedirs(self.inputfilesdir)
         # save parameter file to computations folder
+        json.dump(self.params,open(self.paramfile,"w"))
         shutil.copy(self.paramfile,self.inputfilesdir)
         shutil.copy(self.params["networkfile"], self.inputfilesdir)
         #TODO: Record versions/git number of DSGRN and dsgrn_net_gen
