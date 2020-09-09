@@ -249,6 +249,8 @@ def perform_operations(graph,params):
         ne = numops[2] - num_edges
         if ne > 0:
             graph = removeEdges(graph,ne)
+    if numops[0] and graph is None:
+        graph = graphtranslation.Graph()
     graph = addNodes(graph, params["nodelist"],numops[0])
     if graph and params["DSGRN_optimized"]:
         graph = addEdges_DSGRN_optimized(graph,params["edgelist"],numops[1])
