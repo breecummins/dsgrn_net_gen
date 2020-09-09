@@ -22,8 +22,9 @@ class Job():
         self.inputfilesdir = os.path.join(resultsdir,"inputs"+datetime)
         os.makedirs(self.inputfilesdir)
         # save parameter file to computations folder
-        json.dump(self.params,open(self.paramfile,"w"))
-        shutil.copy(self.paramfile,self.inputfilesdir)
+        newpfile = self.paramfile.split(".")[0]+"_copy.json"
+        json.dump(self.params,open(newpfile,"w"))
+        shutil.move(newpfile,self.inputfilesdir)
         shutil.copy(self.params["networkfile"], self.inputfilesdir)
         #TODO: Record versions/git number of DSGRN and dsgrn_net_gen
 
