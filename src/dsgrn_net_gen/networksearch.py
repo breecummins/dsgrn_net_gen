@@ -178,8 +178,8 @@ def sanity_check_edges(network_spec,starting_graph):
 ##########################################################################################
 
 def enforce_filters(graph,netspec,params):
-    if not params["filters"] or user_filtering(graph, params, netspec):
-        if check_computability(params,netspec):
+    if check_computability(params, netspec):
+        if not params["filters"] or user_filtering(graph, params, netspec):
             return True
     return False
 
