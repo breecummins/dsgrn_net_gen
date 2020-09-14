@@ -4,18 +4,19 @@ import dsgrn_net_gen.graphtranslation as graphtranslation
 from functools import partial
 from inspect import getmembers, isfunction
 import dsgrn_net_gen.filters as filters
+from copy import deepcopy
 
 #####################################################################################################################
 # Function for perturbing networks.
 #####################################################################################################################
 
-def perturbNetwork(params, network_spec):
+def perturbNetwork(params_init, network_spec):
     '''
     Get a list of essential DSGRN network specifications perturbed around an essential seed network given parameters
     in params (see below). Duplicate networks are possible because there is no graph isomorphism checking. Empirical
     usage suggests that the number of duplicates is too small to warrant the computational cost of checking.
 
-    :param params: params is a dictionary with the following key,value pairs.
+    :param params_init: params is a dictionary with the following key,value pairs.
         Required:
         "numneighbors" : integer > 0, how many networks to construct
         "probabilities" : dictionary with node and edge operations keying the probability that the operation will occur
@@ -57,6 +58,7 @@ def perturbNetwork(params, network_spec):
 
 
     # Initialize
+    params = deepcopy(params_init) # required for makejobs.run() to work
     networks = set([])
     params, starting_graph = setup(params,network_spec)
     sanity_check_edges(network_spec,starting_graph)
