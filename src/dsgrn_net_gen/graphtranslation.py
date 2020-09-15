@@ -122,9 +122,9 @@ def createEssentialNetworkSpecFromGraph(graph):
     # generate network spec lines
     network_spec_lines = []
     for node,inedges in  graph_edges.items():
-        act = " + ".join([vs[i] for (i, r) in inedges if r == 'a'])
+        act = " + ".join(sorted([vs[i] for (i, r) in inedges if r == 'a']))
         if act: act = "(" + act + ")"
-        rep = "".join(["(~" + vs[i] + ")" for (i, r) in inedges if r == 'r'])
+        rep = "".join(sorted(["(~" + vs[i] + ")" for (i, r) in inedges if r == 'r']))
         network_spec_lines.append(node + " : " + act + rep + " : E\n")
 
     # alphabetize lines
