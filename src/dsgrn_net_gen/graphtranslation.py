@@ -117,7 +117,7 @@ def createEssentialNetworkSpecFromGraph(graph):
     vs = { v : graph.vertex_label(v) for v in sorted(list(graph.vertices())) }
 
     # get inedges
-    graph_edges = { name : [(a, graph.edge_label(a, v)) for a in graph.inedges(v)] for v,name in vs.items() }
+    graph_edges = { name : sorted([(a, graph.edge_label(a, v)) for a in graph.inedges(v)]) for v,name in vs.items() }
 
     # generate network spec lines
     network_spec_lines = []
