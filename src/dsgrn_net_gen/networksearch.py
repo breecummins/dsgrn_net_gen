@@ -1,6 +1,6 @@
 import random, time, itertools, sys
 import DSGRN
-import dsgrn_net_gen.graphtranslation as graphtranslation
+import dsgrn_utilities.graphtranslation as graphtranslation
 from functools import partial
 from inspect import getmembers, isfunction
 import dsgrn_net_gen.filters as filters

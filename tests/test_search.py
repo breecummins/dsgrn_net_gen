@@ -1,6 +1,6 @@
 from dsgrn_net_gen.makejobs import Job
 import subprocess, os, ast, sys, shutil, json
-import dsgrn_net_gen.graphtranslation as gt
+import dsgrn_utilities.graphtranslation as gt
 import dsgrn_net_gen.networksearch as ns
 from dsgrn_net_gen.filters import *
 import DSGRN
@@ -180,22 +180,22 @@ def test7():
     original_graph = gt.getGraphFromNetworkSpec(original)
     networks = run("params_X1X2X3_E.json")
     # Note: 'X2 : \nX3 : (X2)\n' will not be produced using Shaun's repository (0 out-edges not allowed)
-    assert(set(networks).issubset(set(['X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E\n', 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n', 'X1 : (X1) : E\nX2 : (X1) : E\n','X2 :  : E\nX3 : (X2) : E\n'])))
+    assert(set(networks).issubset(set(['X1 : (X1)(~X3) : E\nX2 : (X1) : E\nX3 : (X1 + X2) : E', 'X1 : (X1)(~X3) : E\nX3 : (X1) : E', 'X1 : (X1) : E\nX2 : (X1) : E','X2 :  : E\nX3 : (X2) : E'])))
     for _ in range(10):
         graph,numedges = ns.removeNodes(original_graph.clone(),1)
         spec = gt.createEssentialNetworkSpecFromGraph(graph)
-        if spec == 'X1 : (X1)(~X3) : E\nX3 : (X1) : E\n':
+        if spec == 'X1 : (X1)(~X3) : E\nX3 : (X1) : E':
             assert(numedges == 2)
-        elif spec == 'X1 : (X1) : E\nX2 : (X1) : E\n':
+        elif spec == 'X1 : (X1) : E\nX2 : (X1) : E':
             assert(numedges == 3)
-        elif 'X2 :  : E\nX3 : (X2) : E\n':
+        elif 'X2 :  : E\nX3 : (X2) : E':
             assert(numedges == 4)
 
 
 def test8():
     # make sure regulation can swap
     networks = run("params_short.json")
-    assert('X1 : (X1)(~X3) : E\nX2 : (~X1) : E\nX3 : (X1 + X2) : E\n' in networks)
+    assert('X1 : (X1)(~X3) : E\nX2 : (~X1) : E\nX3 : (X1 + X2) : E' in networks)
 
 
 if __name__ == "__main__":
