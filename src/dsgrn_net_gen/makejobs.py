@@ -23,7 +23,6 @@ class Job():
         os.makedirs(self.inputfilesdir)
         # save parameter file to computations folder
         newpfile = paramfile.split("/")[-1].split(".")[0]+"_copy.json"
-        print(newpfile)
         json.dump(self.params,open(newpfile,"w"))
         shutil.move(newpfile,self.inputfilesdir)
         shutil.copy(self.params["networkfile"], self.inputfilesdir)
