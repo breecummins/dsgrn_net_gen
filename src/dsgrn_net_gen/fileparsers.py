@@ -16,7 +16,12 @@ def parseEdgeFile(fname):
                 wordlist=l.replace(',',' ').replace('=',' ').split()
                 target=wordlist[0]
                 regsource=wordlist[1].replace('(',' ').replace(')',' ').split()
-                reg=regsource[0]
+                if "a" in regsource[0] and "r" not in regsource[0]:
+                    reg="a"
+                elif "r" in regsource[0] and "a" not in regsource[0]:
+                    reg = "r"
+                else:
+                    raise ValueError("Regulation type ill-specified in edge list.")
                 source=regsource[1]
                 edgelist.append((source,target,reg))
     return edgelist
