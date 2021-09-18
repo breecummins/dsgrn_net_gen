@@ -45,6 +45,8 @@ class Job():
         networks = open(self.params["networkfile"]).read()
         if networks[0] == "[":
             networks = ast.literal_eval(networks)
+            if not networks:
+                networks = [""]
         else:
             while networks[-1] == '\n':
                 networks = networks[:-1]

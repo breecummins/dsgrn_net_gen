@@ -37,9 +37,9 @@ The keywords in the .json parameter dictionary are given as follows. See the `te
 # Parameters 
 __Required:__
 
-  `networkfile`         =   path to a text file containing either a single network specification
+  `networkfile`         =   Path to a text file containing either a single network specification
                             or a list of them (comma-separated and surrounded by square
-                            brackets, saved as plain text)
+                            brackets, saved as plain text) to act as a seed network for generating neighboring networks. Use a file containing the empty list (square brackets []) to generate networks without a starting seed.
 
    `numneighbors`    =   Maximum number of neighboring networks to find (integer);
                             process may time out before this number is reached. 
