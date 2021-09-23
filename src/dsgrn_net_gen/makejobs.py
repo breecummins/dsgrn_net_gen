@@ -43,14 +43,17 @@ class Job():
     def run(self):
         # read network file
         networks = open(self.params["networkfile"]).read()
-        if networks[0] == "[":
-            networks = ast.literal_eval(networks)
-            if not networks:
-                networks = [""]
-        else:
-            while networks[-1] == '\n':
-                networks = networks[:-1]
-            networks = [networks]
+        try: 
+            if networks[0] == "[":
+                networks = ast.literal_eval(networks)
+                if not networks:
+                    networks = [""]
+            else:
+                while networks[-1] == '\n':
+                    networks = networks[:-1]
+                networks = [networks]
+        except IndexError:
+            networks = [""]
         sys.stdout.flush()
         self._parsefile('edge',fileparsers.parseEdgeFile)
         self._parsefile('node',fileparsers.parseNodeFile)

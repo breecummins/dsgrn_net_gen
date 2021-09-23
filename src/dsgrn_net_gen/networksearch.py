@@ -101,7 +101,10 @@ def perturbNetwork(params_init, network_spec):
 
 def setup(params,network_spec):
     # make starting graph, make sure network_spec is essential, and add network_spec to list of networks
-    starting_graph = graphtranslation.getGraphFromNetworkSpec(network_spec)
+    if not network_spec or network_spec == "\n":
+        starting_graph = graphtranslation.Graph()
+    else:
+        starting_graph = graphtranslation.getGraphFromNetworkSpec(network_spec)
     # set defaults
     params = set_defaults(params,starting_graph)
     # remove negative self-regulation from edgelist
